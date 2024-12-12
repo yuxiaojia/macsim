@@ -106,7 +106,6 @@ void pref_mshr_c::init_func(int core_id) {
   region_table = new mshr_region_table_entry_s[*m_simBase->m_knobs
                                                     ->KNOB_PREF_MSHR_TABLE_N];
                                                   
-  std::cout << "mshr init";
 }
 
 // L1 hit training function

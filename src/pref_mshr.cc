@@ -81,6 +81,11 @@ pref_mshr_c::pref_mshr_c(hwp_common_c *hcc, Unit_Type type,
       break;
   }
 
+  // configuration
+  l1_miss = true;
+  l1_hit = true;
+  l2_miss = true;
+
 }
 
 // destructor

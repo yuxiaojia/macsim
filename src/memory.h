@@ -486,6 +486,16 @@ public:
    */
   virtual void invalidate(Addr page_addr);
 
+  /**
+   * Search a request from queues
+   */
+  mem_req_s* search_req(int core_id, Addr addr, int size);
+
+  /**
+   * return mshr size
+   */
+  int mshr_size(int core_id);
+
 public:
   static int m_unique_id; /**< unique memory request id */
 
@@ -514,10 +524,6 @@ protected:
                   Counter unique_num, Counter priority, int core_id,
                   int thread_id, bool ptx);
 
-  /**
-   * Search a request from queues
-   */
-  mem_req_s* search_req(int core_id, Addr addr, int size);
 
   /**
    * Set the level of each cache level

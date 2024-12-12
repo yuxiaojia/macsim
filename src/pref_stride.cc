@@ -119,25 +119,25 @@ void pref_stride_c::init_func(int core_id) {
 
 // L1 hit training function
 void pref_stride_c::l1_hit_func(int tid, Addr lineAddr, Addr loadPC,
-                                uop_c *uop) {
-  l2_miss_func(tid, lineAddr, loadPC, uop);
+                                uop_c *uop, int mshr_matching, int mshr_size) {
+  l2_miss_func(tid, lineAddr, loadPC, uop, mshr_matching, mshr_size);
 }
 
 // L1 miss training function
 void pref_stride_c::l1_miss_func(int tid, Addr lineAddr, Addr loadPC,
-                                 uop_c *uop) {
-  l2_miss_func(tid, lineAddr, loadPC, uop);
+                                 uop_c *uop, int mshr_matching, int mshr_size) {
+  l2_miss_func(tid, lineAddr, loadPC, uop, mshr_matching, mshr_size);
 }
 
 // L2 hit training function
 void pref_stride_c::l2_hit_func(int tid, Addr lineAddr, Addr loadPC,
-                                uop_c *uop) {
+                                uop_c *uop, int mshr_matching, int mshr_size) {
   train(tid, lineAddr, loadPC, true);
 }
 
 // L2 miss training function
 void pref_stride_c::l2_miss_func(int tid, Addr lineAddr, Addr loadPC,
-                                 uop_c *uop) {
+                                 uop_c *uop, int mshr_matching, int mshr_size) {
   train(tid, lineAddr, loadPC, false);
 }
 

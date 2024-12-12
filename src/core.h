@@ -299,9 +299,10 @@ public:
    * @param pc pc address
    * @param uop uop that trains hardware prefetcher
    * @param hit cache hit/miss information
+   * @param mshr_matching mshr matching information
    */
   void train_hw_pref(int level, int tid, Addr addr, Addr pc, uop_c* uop,
-                     bool hit);
+                     bool hit, int mshr_matching, int mshr_size);
 
   /**
    * Get dependence map

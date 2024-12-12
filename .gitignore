@@ -23,3 +23,8 @@ Makefile
 Makefile.in
 *.dirstamp
 sst-unit-test/*.out
+
+macsim_traces/*
+naive_pref_bin/*
+stat_no_pref_hotspot/*
+stat_pref_hotspot/*

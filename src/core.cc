@@ -697,9 +697,9 @@ void core_c::deallocate_thread_data(int tid) {
 
 // train hardware prefetchers based on the event
 void core_c::train_hw_pref(int level, int tid, Addr addr, Addr pc, uop_c* uop,
-                           bool hit) {
+                           bool hit, int mshr_matching, int mshr_size) {
   if (*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON && m_knob_enable_pref) {
-    m_hw_pref->train(level, tid, addr, pc, uop, hit);
+    m_hw_pref->train(level, tid, addr, pc, uop, hit, mshr_matching, mshr_size);
   }
 }
 

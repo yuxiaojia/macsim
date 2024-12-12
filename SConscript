@@ -251,6 +251,7 @@ macsim_src = [
   'src/pref_common.cc',
   'src/pref_factory.cc',
   'src/pref_stride.cc',
+  'src/pref_mshr.cc',
   'src/process_manager.cc',
   'src/readonly_cache.cc',
   'src/retire.cc',

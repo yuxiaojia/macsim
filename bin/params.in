@@ -53,8 +53,8 @@ shared_mem_cycles 2
 shared_mem_ports 1
 byte_level_access 0
 
-l1_small_line_size 128
-#96 KB
+l1_small_line_size 64
+#48 KB
 l1_small_num_set 128 
 l1_small_assoc 6
 #16 KB
@@ -66,7 +66,7 @@ l2_small_latency 100
 llc_latency 200
 
 # L3 Cache (4.5MB 24 way)
-num_llc 12 
+num_llc 12
 llc_num_set 128
 llc_line_size 128
 llc_assoc 24 
@@ -91,7 +91,10 @@ infinite_port 0
 pref_train_inst_once 0
 pref_framework_on 1
 
-
+pref_mshr_on 1
+enable_pref_small_core 1
+mem_mshr_size 128
+pref_mshr_table_n 256
 
 bug_detector_enable 1
 

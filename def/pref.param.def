@@ -127,3 +127,11 @@ param< PREF_STRIDE_SINGLE_STRIDE_MODE, pref_stride_single_stride_mode, bool, fal
 param< PREF_STRIDE_ON, pref_stride_on, bool, false >
 param< PREF_STRIDE_ON_MEDIUM_CORE, pref_stride_on_medium_core, bool, false >
 param< PREF_STRIDE_ON_LARGE_CORE, pref_stride_on_large_core, bool, false >
+
+
+param< DEBUG_PREF_MSHR, debug_pref_mshr, bool, false >
+param< PREF_MSHR_TABLE_N, pref_mshr_table_n, int, 256 >
+param< PREF_MSHR_REGION_BITS, pref_mshr_region_bits, uns, 16 >
+param< PREF_MSHR_ON, pref_mshr_on, bool, false >
+param< PREF_MSHR_ON_MEDIUM_CORE, pref_mshr_on_medium_core, bool, false >
+param< PREF_MSHR_ON_LARGE_CORE, pref_mshr_on_large_core, bool, false >

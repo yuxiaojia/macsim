@@ -228,7 +228,7 @@ public:
    * Train hardware prefetchers.
    */
   void train(int level, int tid, Addr line_addr, Addr load_PC, uop_c *uop,
-             bool hit);
+             bool hit, int mshr_matching, int mshr_size);
 
   /**
    * Initialize prefetchers.
@@ -243,12 +243,12 @@ public:
   /**
    * L1 miss handler
    */
-  void pref_l1_miss(int tid, Addr line_addr, Addr load_PC, uop_c *uop);
+  void pref_l1_miss(int tid, Addr line_addr, Addr load_PC, uop_c *uop,  int mshr_matching, int mshr_size);
 
   /**
    * L1 hit handler
    */
-  void pref_l1_hit(int tid, Addr line_addr, Addr load_PC, uop_c *uop);
+  void pref_l1_hit(int tid, Addr line_addr, Addr load_PC, uop_c *uop,  int mshr_matching, int mshr_size);
 
   /**
    * L1 prefetch hit handler
@@ -264,7 +264,7 @@ public:
   /**
    * L2 miss handler
    */
-  void pref_l2_miss(int tid, Addr line_addr, uop_c *uop);
+  void pref_l2_miss(int tid, Addr line_addr, uop_c *uop, int mshr_matching, int mshr_size);
 
   /**
    * L2 hit handler
@@ -274,7 +274,7 @@ public:
   /**
    * L2 hit handler
    */
-  void pref_l2_hit(int tid, Addr line_addr, Addr load_PC, uop_c *uop);
+  void pref_l2_hit(int tid, Addr line_addr, Addr load_PC, uop_c *uop, int mshr_matching, int mshr_size);
 
   /**
    * L2 prefetch hit handler

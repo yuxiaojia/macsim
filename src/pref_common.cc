@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "knob.h"
 #include "memory.h"
 #include "pref_stride.h"
+#include "pref_mshr.h"
 
 #include "all_knobs.h"
 
@@ -248,7 +249,7 @@ void hwp_common_c::pref_done(void) {
 
 // L1 miss handler
 void hwp_common_c::pref_l1_miss(int tid, Addr line_addr, Addr load_PC,
-                                uop_c *uop) {
+                                uop_c *uop, int mshr_matching, int mshr_size) {
   if (!*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON) return;
 
   if (*m_simBase->m_knobs->KNOB_PREF_DL0_MISS_ON) {
@@ -257,11 +258,11 @@ void hwp_common_c::pref_l1_miss(int tid, Addr line_addr, Addr load_PC,
         if (*m_simBase->m_knobs->KNOB_PREF_TRAIN_INST_ONCE) {
           if (m_last_inst_num.find(tid) == m_last_inst_num.end() ||
               m_last_inst_num[tid] != uop->m_inst_num) {
-            pref_table[ii]->l1_miss_func(tid, line_addr, load_PC, uop);
+            pref_table[ii]->l1_miss_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
             m_last_inst_num[tid] = uop->m_inst_num;
           }
         } else {
-          pref_table[ii]->l1_miss_func(tid, line_addr, load_PC, uop);
+          pref_table[ii]->l1_miss_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
         }
       }
     }
@@ -270,7 +271,7 @@ void hwp_common_c::pref_l1_miss(int tid, Addr line_addr, Addr load_PC,
 
 // L1 hit handler
 void hwp_common_c::pref_l1_hit(int tid, Addr line_addr, Addr load_PC,
-                               uop_c *uop) {
+                               uop_c *uop, int mshr_matching, int mshr_size) {
   if (!*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON) return;
 
   if (*m_simBase->m_knobs->KNOB_PREF_DL0_HIT_ON) {
@@ -279,11 +280,11 @@ void hwp_common_c::pref_l1_hit(int tid, Addr line_addr, Addr load_PC,
         if (*m_simBase->m_knobs->KNOB_PREF_TRAIN_INST_ONCE) {
           if (m_last_inst_num.find(tid) == m_last_inst_num.end() ||
               m_last_inst_num[tid] != uop->m_inst_num) {
-            pref_table[ii]->l1_hit_func(tid, line_addr, load_PC, uop);
+            pref_table[ii]->l1_hit_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
             m_last_inst_num[tid] = uop->m_inst_num;
           }
         } else {
-          pref_table[ii]->l1_hit_func(tid, line_addr, load_PC, uop);
+          pref_table[ii]->l1_hit_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
         }
       }
     }
@@ -309,7 +310,7 @@ void hwp_common_c::pref_l1_pref_hit(int tid, Addr line_addr, Addr load_PC,
 }
 
 // L2 miss handler
-void hwp_common_c::pref_l2_miss(int tid, Addr line_addr, uop_c *uop) {
+void hwp_common_c::pref_l2_miss(int tid, Addr line_addr, uop_c *uop, int mshr_matching, int mshr_size) {
   Addr load_PC = uop ? uop->m_pc : 0;
   if (!*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON) return;
 
@@ -339,11 +340,11 @@ void hwp_common_c::pref_l2_miss(int tid, Addr line_addr, uop_c *uop) {
       if (*m_simBase->m_knobs->KNOB_PREF_TRAIN_INST_ONCE) {
         if (m_last_inst_num.find(tid) == m_last_inst_num.end() ||
             m_last_inst_num[tid] != uop->m_inst_num) {
-          pref_table[ii]->l2_miss_func(tid, line_addr, load_PC, uop);
+          pref_table[ii]->l2_miss_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
           m_last_inst_num[tid] = uop->m_inst_num;
         }
       } else {
-        pref_table[ii]->l2_miss_func(tid, line_addr, load_PC, uop);
+        pref_table[ii]->l2_miss_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
       }
     }
   }
@@ -351,7 +352,7 @@ void hwp_common_c::pref_l2_miss(int tid, Addr line_addr, uop_c *uop) {
 
 // L2 hit handler
 void hwp_common_c::pref_l2_hit(int tid, Addr line_addr, Addr load_PC,
-                               uop_c *uop) {
+                               uop_c *uop, int mshr_matching, int mshr_size) {
   if (!*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON) return;
 
   if (*m_simBase->m_knobs->KNOB_PREF_TRACE_ON)
@@ -368,11 +369,11 @@ void hwp_common_c::pref_l2_hit(int tid, Addr line_addr, Addr load_PC,
       if (*m_simBase->m_knobs->KNOB_PREF_TRAIN_INST_ONCE) {
         if (m_last_inst_num.find(tid) == m_last_inst_num.end() ||
             m_last_inst_num[tid] != uop->m_inst_num) {
-          pref_table[ii]->l2_hit_func(tid, line_addr, load_PC, uop);
+          pref_table[ii]->l2_hit_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
           m_last_inst_num[tid] = uop->m_inst_num;
         }
       } else {
-        pref_table[ii]->l2_hit_func(tid, line_addr, load_PC, uop);
+        pref_table[ii]->l2_hit_func(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
       }
     }
   }
@@ -422,8 +423,9 @@ void hwp_common_c::pref_l2_hit(mem_req_s *req) {
   if ((req->m_type == MRT_DFETCH) || (req->m_type == MRT_DSTORE)) {
     Addr line_addr = req->m_addr;
     Addr loadPC = req->m_pc;
-
-    pref_l2_hit(req->m_thread_id, line_addr, loadPC, NULL);
+    
+    // When hit, mshr input does not matter so put -2 as arguments
+    pref_l2_hit(req->m_thread_id, line_addr, loadPC, NULL, -2, -2);
   }
 }
 
@@ -1459,20 +1461,20 @@ char *hwp_common_c::pref_polbv_access(Addr lineIndex) {
 
 // Train hardware prefetchers
 void hwp_common_c::train(int level, int tid, Addr line_addr, Addr load_PC,
-                         uop_c *uop, bool hit) {
+                         uop_c *uop, bool hit, int mshr_matching, int mshr_size) {
   if (!*m_simBase->m_knobs->KNOB_PREF_FRAMEWORK_ON) return;
 
-  if (level == MEM_L2) {
+  if (level == MEM_L1) {
     if (hit) {
-      pref_l1_hit(tid, line_addr, load_PC, uop);
+      pref_l1_hit(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
     } else {
-      pref_l1_miss(tid, line_addr, load_PC, uop);
+      pref_l1_miss(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
     }
-  } else if (level == MEM_LLC) {
+  } else if (level == MEM_L2) {// Can switch to MEM_LLC
     if (hit) {
-      pref_l2_hit(tid, line_addr, load_PC, uop);
+      pref_l2_hit(tid, line_addr, load_PC, uop, mshr_matching, mshr_size);
     } else {
-      pref_l2_miss(tid, line_addr, uop);
+      pref_l2_miss(tid, line_addr, uop, mshr_matching, mshr_size);
     }
   }
 }

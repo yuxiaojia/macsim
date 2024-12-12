@@ -78,12 +78,12 @@ public:
   /**
    * L1 Cache miss event handler
    */
-  virtual void l1_miss_func(int tid, Addr addr, Addr pc, uop_c *uop) = 0;
+  virtual void l1_miss_func(int tid, Addr addr, Addr pc, uop_c *uop, int mshr_matching, int mshr_size) = 0;
 
   /**
    * L1 Cache hit event handler
    */
-  virtual void l1_hit_func(int tid, Addr addr, Addr pc, uop_c *uop) = 0;
+  virtual void l1_hit_func(int tid, Addr addr, Addr pc, uop_c *uop, int mshr_matching, int mshr_size) = 0;
 
   /**
    * L1 Cache prefetch hit event handler
@@ -93,12 +93,12 @@ public:
   /**
    * L2 Cache miss event handler
    */
-  virtual void l2_miss_func(int, Addr, Addr, uop_c *uop) = 0;
+  virtual void l2_miss_func(int, Addr, Addr, uop_c *uop, int mshr_matching, int mshr_size) = 0;
 
   /**
    * L2 Cache hit event handler
    */
-  virtual void l2_hit_func(int, Addr, Addr, uop_c *uop) = 0;
+  virtual void l2_hit_func(int, Addr, Addr, uop_c *uop, int mshr_matching, int mshr_size) = 0;
 
   /**
    * L2 Cache prefetch hit event handler

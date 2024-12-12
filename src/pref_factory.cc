@@ -37,13 +37,16 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "pref_factory.h"
 #include "assert.h"
 #include "pref_stride.h"
+#include "pref_mshr.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 void pref_factory(vector<pref_base_c *> &pref_table, hwp_common_c *hcc,
                   Unit_Type type, macsim_c *simBase) {
-  pref_base_c *pref_stride = new pref_stride_c(hcc, type, simBase);
-  pref_table.push_back(pref_stride);
+  // pref_base_c *pref_stride = new pref_stride_c(hcc, type, simBase);
+  pref_base_c *pref_mshr = new pref_mshr_c(hcc, type, simBase);
+  pref_table.push_back(pref_mshr);
+  // pref_table.push_back(pref_stride);
 }
 
 // Singleton pointer to pref_factory_c

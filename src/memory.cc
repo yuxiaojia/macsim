@@ -491,7 +491,8 @@ int dcu_c::access(uop_c* uop) {
     // hardware prefetcher training
     // -------------------------------------
     m_simBase->m_core_pointers[uop->m_core_id]->train_hw_pref(
-      MEM_L1, uop->m_thread_id, line_addr, uop->m_pc, uop, true);
+      // When hit, look up the address for increasing the hit count and accuracy
+      MEM_L1, uop->m_thread_id, line_addr, uop->m_pc, uop, true, -1, -1);
 
     if (*m_simBase->m_knobs->KNOB_ENABLE_CACHE_COHERENCE) {
     }
@@ -538,14 +539,6 @@ int dcu_c::access(uop_c* uop) {
     DEBUG_CORE(uop->m_core_id, "L%d[%d] uop_num:%lld cache miss\n", m_level,
                m_id, uop->m_uop_num);
 
-    // -------------------------------------
-    // hardware prefetcher training
-    // -------------------------------------
-    if (!m_disable) {
-      m_simBase->m_core_pointers[uop->m_core_id]->train_hw_pref(
-        MEM_L1, uop->m_thread_id, line_addr, uop->m_pc, uop, false);
-    }
-
     // stat
     uop->m_uop_info.m_dcmiss = true;
 
@@ -589,6 +582,28 @@ int dcu_c::access(uop_c* uop) {
       req_size = m_line_size;
       req_addr = line_addr;
     }
+
+    // find a matching request ans search other cores' MSHRs as well since only L1s have MSHRs
+    // Can be switched between inter-core or intra-core
+    int mshr_merging_size = -1;
+    mem_req_s* matching_req = NULL;
+    for (int i = 0; i < *KNOB(KNOB_NUM_SIM_CORES); ++i) {
+      matching_req = m_memory->search_req(uop->m_core_id, req_addr, req_size); 
+      if (matching_req != NULL) {
+        // return the merging size
+        mshr_merging_size = matching_req->m_merge.size();
+      }else{
+
+      }
+    }
+    // -------------------------------------
+    // hardware prefetcher training
+    // -------------------------------------
+    if (!m_disable) {
+      m_simBase->m_core_pointers[uop->m_core_id]->train_hw_pref(
+        MEM_L1, uop->m_thread_id, line_addr, uop->m_pc, uop, false, mshr_merging_size, m_memory->mshr_size(uop->m_core_id));
+    } 
+
 
     // FIXME (jaekyu, 10-26-2011)
     if (m_id == *m_simBase->m_knobs->KNOB_HETERO_GPU_CORE_DISABLE) {
@@ -770,10 +785,12 @@ void dcu_c::process_in_queue() {
 
       // -------------------------------------
       // hardware prefetcher training
-      // -------------------------------------
+      // -------------------------------------\
+
+     // When hit, look up the address for increasing the hit count and accuracy
       m_simBase->m_core_pointers[req->m_core_id]->train_hw_pref(
         m_level, req->m_thread_id, req->m_addr, req->m_pc,
-        req->m_uop ? req->m_uop : NULL, true);
+        req->m_uop ? req->m_uop : NULL, true, -1, -1);
 
       STAT_EVENT(L1_HIT_CPU + (m_level - 1) * 4 + req->m_acc);
 
@@ -836,10 +853,11 @@ void dcu_c::process_in_queue() {
     // -------------------------------------
     else {
       // hardware prefetcher training
+      // When miss in other caches instead L1, not prefetching for it
       if (!m_disable) {
         m_simBase->m_core_pointers[req->m_core_id]->train_hw_pref(
           m_level, req->m_thread_id, req->m_addr, req->m_pc,
-          req->m_uop ? req->m_uop : NULL, false);
+          req->m_uop ? req->m_uop : NULL, false, -1, -1);
         // g_core_pointers[req->m_core_id]->m_hw_pref->train(m_level, req->m_thread_id,
         //    req->m_addr, req->m_pc, req->m_uop ? req->m_uop : NULL, false);
       }
@@ -1878,7 +1896,9 @@ bool memory_c::new_mem_req(Mem_Req_Type type, Addr addr, uns size,
 
 // allocate a new memory request
 mem_req_s* memory_c::allocate_new_entry(int core_id) {
-  if (m_mshr_free_list[core_id].empty()) return NULL;
+  if (m_mshr[core_id].size() >= *m_simBase->m_knobs->KNOB_MEM_MSHR_SIZE) {
+    return NULL;
+  }
 
   mem_req_s* new_req = m_mshr_free_list[core_id].back();
   m_mshr_free_list[core_id].pop_back();
@@ -1898,6 +1918,11 @@ mem_req_s* memory_c::search_req(int core_id, Addr addr, int size) {
   }
 
   return NULL;
+}
+
+// get mshr size
+int memory_c::mshr_size(int core_id) {
+  return m_mshr[core_id].size();
 }
 
 // initialize a new request
@@ -2003,8 +2028,10 @@ void memory_c::free_req(int core_id, mem_req_s* req) {
     delete req;
   } else {
     req->init();
-    m_mshr[core_id].remove(req);
-    m_mshr_free_list[core_id].push_back(req);
+    if(m_mshr_free_list[core_id].size() < *m_simBase->m_knobs->KNOB_MEM_MSHR_SIZE){
+      m_mshr[core_id].remove(req);
+      m_mshr_free_list[core_id].push_back(req);
+    }
   }
 }
 
@@ -2032,7 +2059,7 @@ Addr memory_c::base_addr(int core_id, Addr addr) {
 
 // get cache line size
 int memory_c::line_size(int core_id) {
-  return m_l1_cache[core_id]->line_size();
+  return 64; //m_l1_cache[core_id]->line_size();
 }
 
 // from level id, get destination noc id
